@@ -108,8 +108,13 @@ function circle(cx: number, cy: number, r: number): string {
 /** Radio de las esquinas en la forma redondeada, en fracción de módulo. */
 const ROUNDED_RADIUS = 0.28;
 
-/** Radio del punto. Por debajo de 0.5 para que los módulos queden separados. */
-const DOT_RADIUS = 0.42;
+/**
+ * Radio del punto: medio módulo exacto, de modo que los puntos contiguos se
+ * tocan. Con 0.42 se veía más aireado pero el código dejaba de leerse: los
+ * huecos parten el patrón de sincronización, que es la línea alterna que el
+ * escáner usa para alinear la retícula. Medido con la verificación en vivo.
+ */
+const DOT_RADIUS = 0.5;
 
 function bodyModulePath(
   matrix: QrMatrix,

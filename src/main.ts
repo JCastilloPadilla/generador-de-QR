@@ -6,7 +6,13 @@ import { realWorldCaution } from './contrast';
 import { createVerifier, type Verification } from './verify';
 import { getContentType } from './content-types';
 import { createStore, type AppState } from './state';
-import { mountEccControl, mountSizeControl, mountColorControl, mountLogoControl } from './ui/controls';
+import {
+  mountEccControl,
+  mountSizeControl,
+  mountColorControl,
+  mountShapeControl,
+  mountLogoControl,
+} from './ui/controls';
 import { mountTypePicker, mountFields, renderFields, defaultValues } from './ui/fields';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#preview')!;
@@ -52,6 +58,7 @@ mountFields(fieldsEl, store);
 
 const eccControl = mountEccControl(document.querySelector<HTMLElement>('#ecc-row')!, store);
 mountSizeControl(document.querySelector<HTMLElement>('#size-row')!, store);
+mountShapeControl(document.querySelector<HTMLElement>('#shape-row')!, store);
 mountColorControl(document.querySelector<HTMLElement>('#color-row')!, store);
 mountLogoControl(document.querySelector<HTMLElement>('#logo-row')!, store, (dataUrl) => {
   logoDataUrl = dataUrl;
