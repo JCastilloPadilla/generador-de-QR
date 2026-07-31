@@ -8,15 +8,20 @@
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
 <body>
+  <div id="shader-background" aria-hidden="true"></div>
+
+  <!-- Una sola losa esmerilada sostiene todo el contenido. El fondo respira a
+       su alrededor y ningún texto queda nunca sobre la textura en movimiento. -->
+  <div class="shell">
   <header class="masthead">
-    <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
-      <path d="M0 0h7v1H0zM0 6h7v1H0zM0 0h1v7H0zM6 0h1v7H6z" fill="currentColor"/>
-      <path d="M2 2h3v3H2z" fill="currentColor"/>
-    </svg>
-    <h1>Generador de QR</h1>
+    <a class="brand" href="/" aria-label="Generador de QR, inicio">
+      <svg class="mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 3h7v7H3V3Zm2 2v3h3V5H5Zm9-2h7v7h-7V3Zm2 2v3h3V5h-3ZM3 14h7v7H3v-7Zm2 2v3h3v-3H5Zm9-2h2v2h-2v-2Zm3 0h4v4h-2v-2h-2v-2Zm-3 3h3v4h-3v-4Zm5 2h2v2h-2v-2Z" fill="currentColor"/>
+      </svg>
+      <span>QR</span>
+    </a>
     <p class="masthead__note">
-      Todo ocurre en tu navegador. Tu contenido no se envía a ningún servidor y el
-      código apunta al destino real, no a un redireccionamiento.
+      Genera códigos QR estáticos, personalizados y listos para descargar. Todo se procesa en tu navegador.
     </p>
   </header>
 
@@ -62,12 +67,16 @@
   </main>
 
   <footer class="colophon">
-    <p>
-      Este generador no crea códigos dinámicos: no hay redirección intermedia que pueda
-      caerse, cambiar de destino o contar quién escanea. Lo que ves en el bloque
-      «se codifica exactamente esto» es lo que queda grabado en el código, y nada más.
-    </p>
+    <div class="colophon__brand">
+      <svg class="mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 3h7v7H3V3Zm2 2v3h3V5H5Zm9-2h7v7h-7V3Zm2 2v3h3V5h-3ZM3 14h7v7H3v-7Zm2 2v3h3v-3H5Zm9-2h2v2h-2v-2Zm3 0h4v4h-2v-2h-2v-2Zm-3 3h3v4h-3v-4Zm5 2h2v2h-2v-2Z" fill="currentColor"/>
+      </svg>
+      <span>QR</span>
+    </div>
+    <p>Un QR estático no depende de terceros: no puede caducar, cambiar de destino ni registrar quién lo escanea.</p>
+    <p class="colophon__fineprint">El contenido visible arriba es exactamente el contenido que queda grabado en tu código.</p>
   </footer>
+  </div>
 
   <script type="module" src="/src/main.ts"></script>
 </body>

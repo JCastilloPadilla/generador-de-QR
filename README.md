@@ -1,7 +1,20 @@
-# Generador de QR
+# QR
 
-Generador de códigos QR que funciona por completo en el navegador. El contenido nunca
-sale del dispositivo y el código apunta siempre al destino final directo.
+Generador de códigos QR estáticos, personalizados y privados. Todo ocurre en el navegador:
+el contenido nunca sale del dispositivo y cada código apunta directamente a su destino, sin
+acortadores ni redirecciones intermedias.
+
+La interfaz está pensada para crear y descargar códigos QR con rapidez, manteniendo una
+vista clara de lo que se codifica y una verificación de lectura en tiempo real.
+
+## Características
+
+- Nueve formatos: enlace, texto, WiFi, contacto, llamada, SMS, correo, ubicación y evento.
+- Descarga en PNG (256 a 2048 px) y SVG vectorial.
+- Personalización de colores, módulos, patrones de esquina y logo central.
+- Verificación local: la aplicación vuelve a leer el QR generado antes de descargarlo.
+- Sin backend, cuentas, analítica ni códigos dinámicos.
+- Fondo animado sutil mediante `@paper-design/shaders-react`, sin interferir con los controles.
 
 ## Qué es, y qué no es
 
@@ -34,6 +47,12 @@ npm install
 npm run dev
 ```
 
+Abre la URL local que muestre Vite. Para crear una compilación de producción:
+
+```bash
+npm run build
+```
+
 ```bash
 npm test
 ```
@@ -53,11 +72,7 @@ directamente los píxeles del borde contra el valor literal de 4 módulos.
 
 ## Compilar para producción
 
-```bash
-npm run build
-```
-
-Genera `dist/` con archivos estáticos. `npm run preview` sirve ese build en local para
+`npm run build` genera `dist/` con archivos estáticos. `npm run preview` sirve ese build en local para
 comprobarlo antes de subirlo.
 
 `vite.config.ts` usa `base: './'`, así que el mismo `dist/` funciona tanto en un
@@ -113,11 +128,12 @@ export.ts          descarga PNG | SVG      verify.ts  ¿se vuelve a leer?
 | `src/geometry.ts` | Traduce la matriz a trazados en coordenadas de módulo. Formas y zona silenciosa. |
 | `src/renderer.ts` | Lleva esos trazados a canvas y a SVG. Color y logo. |
 | `src/verify.ts` | Decodifica el código dibujado y explica la causa probable si no se lee. |
-| `src/content-types.ts` | Los cuatro tipos, declarados como dato: campos y serialización. |
+| `src/content-types.ts` | Los tipos de contenido, declarados como dato: campos y serialización. |
 | `src/contrast.ts` | Luminancia relativa y avisos de escaneabilidad. |
 | `src/export.ts` | Descargas mediante blobs locales. |
 | `src/state.ts` | Estado de la aplicación. |
 | `src/ui/` | Construcción del formulario y de los controles. |
+| `src/background.tsx` | Monta el fondo visual React/Warp detrás de la interfaz. |
 
 **Por qué renderizado propio.** Se usa `QRCode.create()` en vez de `toCanvas()` o
 `toString()` para quedarse con la matriz de módulos. Los renderizadores de la librería no

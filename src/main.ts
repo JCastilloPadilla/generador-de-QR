@@ -207,3 +207,7 @@ svgBtn.addEventListener('click', () => {
 // por defecto del tipo para que ningún campo quede sin sembrar.
 store.patch({ values: { ...defaultValues(initial.type), ...initial.values } });
 render();
+
+// El fondo es decoración y pesa varias veces más que el generador, así que se
+// carga al final y aparte. Nada de lo que hace el usuario espera por él.
+void import('./background');

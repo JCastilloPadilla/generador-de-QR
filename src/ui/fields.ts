@@ -12,13 +12,27 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
+/** Iconos discretos para identificar el contenido antes de leer la etiqueta. */
+const TYPE_ICONS: Record<string, string> = {
+  url: '<path d="M10.5 13.5 13.5 10.5m-6.7 5.2-1.1 1.1a3 3 0 0 1-4.2-4.2l3-3a3 3 0 0 1 4.2 0M17.2 8.3l1.1-1.1a3 3 0 1 0-4.2-4.2l-3 3a3 3 0 0 0 0 4.2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>',
+  text: '<path d="M4 4h12M10 4v12M6.5 16h7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>',
+  email: '<rect x="2.5" y="4.5" width="15" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m3.5 6 6.5 5 6.5-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>',
+  phone: '<path d="M6 2.8 8.2 5 6.7 7.3a12.6 12.6 0 0 0 6 6l2.3-1.5 2.2 2.2-1.4 2.2c-.5.8-1.5 1.2-2.4.9C7.6 15.6 4.4 12.4 2.7 6.6c-.3-.9.1-1.9.9-2.4L6 2.8Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"/>',
+  wifi: '<path d="M2.5 7.2a11 11 0 0 1 15 0M5.2 10a7 7 0 0 1 9.6 0M8 12.8a3 3 0 0 1 4 0M10 16h.01" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>',
+  vcard: '<rect x="2.5" y="3.5" width="15" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="7" cy="8" r="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4.7 13c.7-1.3 3-1.3 3.7 0M11 7h4M11 10h4M11 13h2.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"/>',
+  tel: '<path d="M6 2.8 8.2 5 6.7 7.3a12.6 12.6 0 0 0 6 6l2.3-1.5 2.2 2.2-1.4 2.2c-.5.8-1.5 1.2-2.4.9C7.6 15.6 4.4 12.4 2.7 6.6c-.3-.9.1-1.9.9-2.4L6 2.8Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"/>',
+  sms: '<path d="M3 4.5h14v9H8l-4 3v-3H3v-9Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"/><path d="M6.5 8h7M6.5 10.5h4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"/>',
+  geo: '<path d="M10 17s5-5.4 5-9A5 5 0 1 0 5 8c0 3.6 5 9 5 9Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.7"/><circle cx="10" cy="8" r="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+  event: '<rect x="3" y="4.5" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 2.8v3.4M13.5 2.8v3.4M3 8h14M6.5 11h2M11.5 11h2M6.5 14h2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"/>',
+};
+
 export function mountTypePicker(host: HTMLElement, store: Store): void {
   host.innerHTML = CONTENT_TYPES.map(
     (type) => `
     <label class="type">
       <input type="radio" name="content-type" value="${type.id}"
              ${type.id === store.get().type ? 'checked' : ''} />
-      <span>${type.label}</span>
+      <span><svg class="type__icon" viewBox="0 0 20 20" aria-hidden="true">${TYPE_ICONS[type.id] ?? TYPE_ICONS.text}</svg>${type.label}</span>
     </label>`,
   ).join('');
 

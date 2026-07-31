@@ -1,20 +1,29 @@
 /* Sistema de diseño ------------------------------------------------------
  *
  * La interfaz es monocroma a propósito: el único color libre en pantalla
- * debe ser el que el usuario elige para su código. El acento cobalto solo
- * aparece en foco y estado activo.
+ * debe ser el que el usuario elige para su código. Los estados activos usan
+ * la misma escala de negros y grises del resto de la interfaz.
  *
  * Regla tipográfica: la monoespaciada es para lo que leerá la máquina
  * (payload, versión, bytes, hex). La sans es para lo que lee la persona.
  */
 
 :root {
-  --paper: #F6F7F9;
+  --paper: #F5F6F8;
   --surface: #FFFFFF;
-  --ink: #15171C;
-  --muted: #697184;
-  --line: #E1E4EA;
-  --signal: #1F3BE0;
+  /* La opacidad de la losa no es un gusto estético: es lo que mantiene el
+   * texto legible pase por donde pase la textura. Medida contra los tres tonos
+   * del shader, .72 deja el texto secundario en 4.67:1 en el peor caso; con
+   * .58 caía a 3.33:1, por debajo del mínimo, y encima variaba al animarse. */
+  --glass: rgba(248, 249, 251, .72);
+  --glass-strong: rgba(255, 255, 255, .72);
+  --glass-border: rgba(255, 255, 255, .7);
+  --ink: #15181F;
+  --muted: #5A6274;
+  --line: #E3E6EC;
+  --line-strong: #CED4DF;
+  --signal: #15181F;
+  --signal-soft: #EEF0F3;
   --warn: #B4531A;
 
   --font-ui: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", sans-serif;
@@ -26,10 +35,14 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+html { background: var(--paper); }
+
 body {
   margin: 0;
-  padding: calc(var(--mod) * 3) calc(var(--mod) * 2) calc(var(--mod) * 8);
-  background: var(--paper);
+  /* El mínimo no baja de 12px: por debajo, el fondo asoma como una franja
+   * estrecha que parece un fallo de alineación en vez de un marco. */
+  padding: clamp(calc(var(--mod) * 1.5), 2.5vw, calc(var(--mod) * 5));
+  background: transparent;
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 16px;
@@ -37,25 +50,116 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Fondo animado ----------------------------------------------------------
+ *
+ * Se queda fijo detrás de todo y nunca lleva texto encima: la legibilidad no
+ * depende de dónde caiga la textura en cada momento, que además se mueve.
+ */
+
+#shader-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--paper);
+}
+
+#shader-background canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* La losa ----------------------------------------------------------------
+ *
+ * Tesis del diseño: todo en la página es translúcido y el código es lo único
+ * sólido. El QR *es* el destino real, no un puntero a él, así que en pantalla
+ * le toca ser el único objeto con cuerpo. El resto es atmósfera.
+ *
+ * En la práctica esto también resuelve la legibilidad: al vivir el contenido
+ * sobre una superficie esmerilada propia, ningún texto compite con el fondo.
+ */
+
+.shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: clamp(calc(var(--mod) * 2.5), 3.5vw, calc(var(--mod) * 6));
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .6) inset,
+    0 24px 70px -28px rgba(21, 24, 31, .28);
+  backdrop-filter: blur(28px) saturate(125%);
+  -webkit-backdrop-filter: blur(28px) saturate(125%);
+}
+
+/* Sin `backdrop-filter` la losa sería casi transparente y el texto quedaría
+ * sobre la textura. Se compensa con una superficie mucho más opaca. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .shell { background: rgba(248, 249, 251, .93); }
+}
+
+@media (max-width: 599px) {
+  .shell {
+    border-radius: 12px;
+    padding: calc(var(--mod) * 2.5) calc(var(--mod) * 2);
+  }
+}
+
 /* Cabecera --------------------------------------------------------------- */
 
+/* La losa ya pone el margen exterior: la cabecera ocupa su ancho completo y
+ * solo marca la separación interna. */
 .masthead {
-  max-width: 68ch;
-  margin: 0 auto calc(var(--mod) * 4);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: calc(var(--mod) * 2.5);
+  margin: 0 0 calc(var(--mod) * 4);
+  padding: 0 0 calc(var(--mod) * 3);
+  border-bottom: 1px solid var(--line);
 }
 
 .mark {
-  display: block;
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   color: var(--ink);
 }
 
+.brand,
+.colophon__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: .8125rem;
+  font-weight: 650;
+  letter-spacing: -.01em;
+  text-decoration: none;
+}
+
+.brand { grid-column: 1 / -1; }
+.brand .mark { color: var(--signal); }
+.masthead__content { max-width: 58ch; }
+
+.eyebrow {
+  margin: 0 0 calc(var(--mod) * .75);
+  color: var(--signal);
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
 .masthead h1 {
-  margin: calc(var(--mod) * 1.5) 0 var(--mod);
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  margin: 0 0 var(--mod);
+  font-size: clamp(1.55rem, 3vw, 2.15rem);
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: -.045em;
 }
 
 .masthead__note {
@@ -63,6 +167,32 @@ body {
   max-width: 52ch;
   color: var(--muted);
   font-size: 0.875rem;
+  line-height: 1.6;
+  max-width: 48ch;
+}
+
+.masthead__trust {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: end;
+  gap: 5px;
+  padding-bottom: 2px;
+  color: var(--muted);
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.masthead__trust span::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin: 0 7px 1px 0;
+  background: var(--signal);
+  border-radius: 50%;
 }
 
 /* Layout ----------------------------------------------------------------- */
@@ -78,17 +208,18 @@ body {
   .layout {
     /* La columna de controles se limita a propósito: un campo de formulario
      * de 600px de ancho no se lee mejor, solo se ve descuidado. */
-    grid-template-columns: minmax(0, 460px) minmax(320px, 380px);
-    justify-content: center;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+    gap: calc(var(--mod) * 6);
     align-items: start;
-    max-width: 1080px;
+    max-width: none;
   }
 
   .controls { order: -1; }
 
   .stage {
     position: sticky;
-    top: calc(var(--mod) * 3);
+    /* Se despega del borde de la losa, no del de la ventana. */
+    top: calc(var(--mod) * 4);
   }
 }
 
@@ -99,11 +230,17 @@ body {
   gap: calc(var(--mod) * 2);
 }
 
+/* El único elemento opaco de la página, y a propósito: es el objeto real, no
+ * una representación de otra cosa. La sombra lo levanta sobre la losa en vez
+ * de dejarlo empotrado en ella. */
 .stage__frame {
-  padding: calc(var(--mod) * 2);
+  padding: calc(var(--mod) * 2.5);
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 12px;
+  box-shadow:
+    0 2px 6px -1px rgba(21, 24, 31, .09),
+    0 18px 42px -14px rgba(21, 24, 31, .22);
 }
 
 #preview {
@@ -142,6 +279,7 @@ body {
 
 .payload__label {
   font-size: 0.6875rem;
+  font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--muted);
 }
@@ -152,8 +290,9 @@ body {
   overflow-y: auto;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: 5px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   line-height: 1.6;
@@ -198,7 +337,7 @@ body {
 .alert {
   margin: 0;
   padding: var(--mod) calc(var(--mod) * 1.5);
-  background: var(--surface);
+  background: var(--glass-strong);
   border-left: 2px solid var(--warn);
   color: var(--warn);
   font-size: 0.8125rem;
@@ -229,7 +368,8 @@ body {
   font-size: 0.6875rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .group__title::before {
@@ -237,8 +377,8 @@ body {
   flex: none;
   width: 9px;
   height: 9px;
-  border: 2px solid var(--ink);
-  box-shadow: inset 0 0 0 1px var(--surface);
+  border: 2px solid var(--signal);
+  box-shadow: inset 0 0 0 1px var(--surface), 0 0 0 2px var(--signal-soft);
 }
 
 .row {
@@ -264,19 +404,24 @@ body {
 }
 
 .type span {
-  display: block;
-  padding: var(--mod) calc(var(--mod) * 1.75);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: calc(var(--mod) * .9) calc(var(--mod) * 1.25);
+  background: transparent;
+  border: 1px solid rgba(215, 220, 228, .72);
+  border-radius: 5px;
   font-size: 0.875rem;
   transition: border-color 120ms ease, color 120ms ease;
 }
 
 .type input:checked + span {
   border-color: var(--signal);
+  background: var(--signal-soft);
   color: var(--signal);
 }
+
+.type__icon { width: 15px; height: 15px; flex: none; }
 
 .type input:focus-visible + span {
   outline: 2px solid var(--signal);
@@ -327,9 +472,9 @@ body {
   justify-items: center;
   gap: calc(var(--mod) * 0.5);
   padding: var(--mod) calc(var(--mod) * 0.5);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 2px;
+  background: transparent;
+  border: 1px solid rgba(215, 220, 228, .72);
+  border-radius: 5px;
   color: var(--ink);
   transition: border-color 120ms ease, color 120ms ease;
 }
@@ -348,6 +493,7 @@ body {
 
 .shape input:checked + .shape__box {
   border-color: var(--signal);
+  background: var(--signal-soft);
   color: var(--signal);
 }
 
@@ -380,7 +526,7 @@ body {
   padding: 0;
   background: none;
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
@@ -410,7 +556,7 @@ body {
   padding: 0;
   background: none;
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
@@ -432,10 +578,10 @@ input[type="file"]::file-selector-button {
   padding: calc(var(--mod) * 0.75) calc(var(--mod) * 1.5);
   font: inherit;
   font-size: 0.8125rem;
-  background: var(--surface);
+  background: transparent;
   color: var(--ink);
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
@@ -451,10 +597,23 @@ textarea, select {
   padding: calc(var(--mod) * 1.25) calc(var(--mod) * 1.5);
   font: inherit;
   font-size: 0.9375rem;
-  background: var(--surface);
+  background: rgba(255, 255, 255, .5);
   color: var(--ink);
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 5px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+input[type="text"]:hover, input[type="url"]:hover, input[type="password"]:hover,
+input[type="tel"]:hover, input[type="email"]:hover, input[type="number"]:hover,
+input[type="datetime-local"]:hover, textarea:hover, select:hover { border-color: var(--line-strong); }
+
+input[type="text"]:focus, input[type="url"]:focus, input[type="password"]:focus,
+input[type="tel"]:focus, input[type="email"]:focus, input[type="number"]:focus,
+input[type="datetime-local"]:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px var(--signal-soft);
 }
 
 textarea {
@@ -484,10 +643,10 @@ textarea {
   font: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  background: var(--surface);
+  background: transparent;
   color: var(--ink);
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 5px;
   cursor: pointer;
   transition: border-color 120ms ease, background-color 120ms ease;
 }
@@ -520,17 +679,30 @@ textarea {
 /* Cierre ------------------------------------------------------------------ */
 
 .colophon {
-  max-width: 68ch;
-  margin: calc(var(--mod) * 8) auto 0;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 58ch);
+  column-gap: calc(var(--mod) * 8);
+  row-gap: var(--mod);
+  margin: calc(var(--mod) * 6) 0 0;
   padding-top: calc(var(--mod) * 3);
   border-top: 1px solid var(--line);
 }
 
 .colophon p {
   margin: 0;
-  max-width: 60ch;
   font-size: 0.8125rem;
+  line-height: 1.6;
   color: var(--muted);
+}
+
+.colophon__brand { grid-row: span 2; align-self: start; }
+.colophon__fineprint { color: var(--muted); font-size: .75rem !important; }
+
+@media (max-width: 899px) {
+  .masthead { grid-template-columns: 1fr; gap: calc(var(--mod) * 2); }
+  .masthead__trust { flex-direction: row; flex-wrap: wrap; justify-content: start; align-items: center; padding: 0; }
+  .colophon { grid-template-columns: 1fr; gap: var(--mod); }
+  .colophon__brand { grid-row: auto; margin-bottom: var(--mod); }
 }
 
 @media (prefers-reduced-motion: reduce) {
