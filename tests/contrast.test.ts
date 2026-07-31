@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contrastRatio, scanabilityWarning } from '../src/contrast';
+import { contrastRatio, realWorldCaution } from '../src/contrast';
 
 describe('contrastRatio', () => {
   it('da 21 para negro sobre blanco', () => {
@@ -22,21 +22,35 @@ describe('contrastRatio', () => {
   });
 });
 
-describe('scanabilityWarning', () => {
+describe('realWorldCaution', () => {
   it('no avisa con negro sobre blanco', () => {
-    expect(scanabilityWarning('#000000', '#FFFFFF')).toBeNull();
+    expect(realWorldCaution('#000000', '#FFFFFF')).toBeNull();
   });
 
   it('avisa sin alarmar en la banda intermedia', () => {
     // #808080 sobre blanco ronda 3.9:1: por debajo de 4.5 pero por encima de 3.
-    const warning = scanabilityWarning('#808080', '#FFFFFF');
     expect(contrastRatio('#808080', '#FFFFFF')).toBeGreaterThan(3);
     expect(contrastRatio('#808080', '#FFFFFF')).toBeLessThan(4.5);
-    expect(warning).toContain('bajo');
-    expect(warning).not.toContain('no va a escanear');
+    const aviso = realWorldCaution('#808080', '#FFFFFF');
+    expect(aviso).toContain('justo');
+    expect(aviso).toContain('imprimir');
   });
 
   it('avisa con más énfasis cuando el contraste es crítico', () => {
-    expect(scanabilityWarning('#808080', '#828282')).toContain('no va a escanear');
+    expect(realWorldCaution('#808080', '#828282')).toContain('muy probable que falle');
+  });
+
+  /**
+   * El aviso complementa a la verificación de escaneo, no la contradice: nunca
+   * debe afirmar que el código no se lee, porque quien decide eso es el lector.
+   */
+  it('nunca afirma que el código no se lee', () => {
+    for (const [fg, bg] of [
+      ['#808080', '#828282'],
+      ['#808080', '#FFFFFF'],
+      ['#777777', '#BBBBBB'],
+    ]) {
+      expect(realWorldCaution(fg!, bg!) ?? '').not.toContain('no va a escanear');
+    }
   });
 });

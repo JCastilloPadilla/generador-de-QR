@@ -159,6 +159,39 @@ body {
   line-height: 1.6;
 }
 
+/* Verificación de escaneo: la app lee su propio código y lo dice. Es una
+ * lectura de máquina, así que va en monoespaciada como el resto. */
+
+.verify {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--mod) * 0.75);
+  margin: 0;
+  min-height: 1.4em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.verify::before {
+  content: "·";
+  flex: none;
+  font-size: 1rem;
+}
+
+.verify[data-state="ok"] { color: var(--ink); }
+.verify[data-state="ok"]::before { content: "✓"; }
+
+.verify[data-state="ilegible"],
+.verify[data-state="difiere"] {
+  color: var(--warn);
+  font-weight: 500;
+}
+
+.verify[data-state="ilegible"]::before,
+.verify[data-state="difiere"]::before { content: "✕"; }
+
 .alert {
   margin: 0;
   padding: var(--mod) calc(var(--mod) * 1.5);
