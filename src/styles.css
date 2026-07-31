@@ -76,7 +76,10 @@ body {
 
 @media (min-width: 900px) {
   .layout {
-    grid-template-columns: 1fr minmax(320px, 380px);
+    /* La columna de controles se limita a propósito: un campo de formulario
+     * de 600px de ancho no se lee mejor, solo se ve descuidado. */
+    grid-template-columns: minmax(0, 460px) minmax(320px, 380px);
+    justify-content: center;
     align-items: start;
     max-width: 1080px;
   }
@@ -107,7 +110,18 @@ body {
   display: block;
   width: 100%;
   height: auto;
+  margin-inline: auto;
   image-rendering: pixelated;
+}
+
+/* En móvil el código no debe empujar los controles fuera de la pantalla:
+ * se ve entero de un vistazo y los campos quedan a un scroll corto. */
+@media (max-width: 899px) {
+  #preview {
+    width: auto;
+    max-width: 100%;
+    max-height: 42vh;
+  }
 }
 
 /* Lecturas técnicas: siempre monoespaciada -------------------------------- */
@@ -371,6 +385,22 @@ textarea {
 }
 
 .actions .btn { flex: 1 1 auto; }
+
+/* Cierre ------------------------------------------------------------------ */
+
+.colophon {
+  max-width: 68ch;
+  margin: calc(var(--mod) * 8) auto 0;
+  padding-top: calc(var(--mod) * 3);
+  border-top: 1px solid var(--line);
+}
+
+.colophon p {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
 
 @media (prefers-reduced-motion: reduce) {
   * {

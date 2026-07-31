@@ -28,6 +28,64 @@ export function modulePixelSize(matrix: QrMatrix, sizePx: number): number {
   return Math.max(1, Math.floor(sizePx / total));
 }
 
+function parseHex(hex: string): [number, number, number] {
+  let value = hex.replace('#', '').trim();
+  if (value.length === 3) {
+    value = value
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+  const int = Number.parseInt(value, 16);
+  return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
+}
+
+/**
+ * Píxeles del código, sin logo. Es la verdad de lo que se dibuja, y al ser una
+ * función pura se puede decodificar en un test sin necesidad de un navegador.
+ */
+export function renderToPixels(
+  matrix: QrMatrix,
+  sizePx: number,
+  style: RenderStyle,
+): { data: Uint8ClampedArray<ArrayBuffer>; width: number; height: number } {
+  const scale = modulePixelSize(matrix, sizePx);
+  const drawn = (matrix.size + QUIET_ZONE * 2) * scale;
+  const offset = Math.floor((sizePx - drawn) / 2);
+
+  const [br, bg, bb] = parseHex(style.background);
+  const [fr, fg, fb] = parseHex(style.foreground);
+
+  const data = new Uint8ClampedArray(new ArrayBuffer(sizePx * sizePx * 4));
+  for (let i = 0; i < data.length; i += 4) {
+    data[i] = br;
+    data[i + 1] = bg;
+    data[i + 2] = bb;
+    data[i + 3] = 255;
+  }
+
+  const paint = (x: number, y: number): void => {
+    if (x < 0 || y < 0 || x >= sizePx || y >= sizePx) return;
+    const i = (y * sizePx + x) * 4;
+    data[i] = fr;
+    data[i + 1] = fg;
+    data[i + 2] = fb;
+  };
+
+  for (let row = 0; row < matrix.size; row++) {
+    for (let col = 0; col < matrix.size; col++) {
+      if (!matrix.get(row, col)) continue;
+      const left = offset + (col + QUIET_ZONE) * scale;
+      const top = offset + (row + QUIET_ZONE) * scale;
+      for (let y = 0; y < scale; y++) {
+        for (let x = 0; x < scale; x++) paint(left + x, top + y);
+      }
+    }
+  }
+
+  return { data, width: sizePx, height: sizePx };
+}
+
 export function drawToCanvas(
   canvas: HTMLCanvasElement,
   matrix: QrMatrix,
@@ -40,27 +98,13 @@ export function drawToCanvas(
   canvas.width = sizePx;
   canvas.height = sizePx;
 
-  const scale = modulePixelSize(matrix, sizePx);
-  const drawn = (matrix.size + QUIET_ZONE * 2) * scale;
-  const offset = Math.floor((sizePx - drawn) / 2);
-
-  ctx.fillStyle = style.background;
-  ctx.fillRect(0, 0, sizePx, sizePx);
-
-  ctx.fillStyle = style.foreground;
-  for (let row = 0; row < matrix.size; row++) {
-    for (let col = 0; col < matrix.size; col++) {
-      if (!matrix.get(row, col)) continue;
-      ctx.fillRect(
-        offset + (col + QUIET_ZONE) * scale,
-        offset + (row + QUIET_ZONE) * scale,
-        scale,
-        scale,
-      );
-    }
-  }
+  const pixels = renderToPixels(matrix, sizePx, style);
+  ctx.putImageData(new ImageData(pixels.data, pixels.width, pixels.height), 0, 0);
 
   if (style.logo) {
+    const scale = modulePixelSize(matrix, sizePx);
+    const drawn = (matrix.size + QUIET_ZONE * 2) * scale;
+    const offset = Math.floor((sizePx - drawn) / 2);
     drawLogo(ctx, style, matrix.size * scale, offset + QUIET_ZONE * scale);
   }
 }
