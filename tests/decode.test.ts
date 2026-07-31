@@ -82,4 +82,37 @@ describe('lo renderizado se puede volver a leer', () => {
     const texto = 'Café en la esquina — ¿nos vemos? ☕';
     expect(roundTrip(texto)).toBe(texto);
   });
+
+  it('decodifica un evento con comas y saltos de línea escapados', () => {
+    const payload = getContentType('event').serialize({
+      summary: 'Cena, copas y más',
+      start: '2026-08-01T19:00',
+      end: '2026-08-01T23:30',
+      location: 'Calle 5; piso 3',
+      description: 'Primera línea\nSegunda línea',
+    });
+    expect(roundTrip(payload, 'M', NEGRO_SOBRE_BLANCO, 1024)).toBe(payload);
+    expect(payload).toContain('SUMMARY:Cena\\, copas y más');
+    expect(payload).toContain('LOCATION:Calle 5\\; piso 3');
+  });
+
+  it('decodifica un correo con asunto y cuerpo codificados', () => {
+    const payload = getContentType('email').serialize({
+      to: 'hola@ccastillo.dev',
+      subject: 'Presupuesto & plazos',
+      body: '¿Nos vemos el martes?',
+    });
+    expect(roundTrip(payload, 'M', NEGRO_SOBRE_BLANCO, 1024)).toBe(payload);
+  });
+
+  it('decodifica los tipos cortos: llamada, SMS y ubicación', () => {
+    const casos = [
+      getContentType('tel').serialize({ phone: '+52 55 1234 5678' }),
+      getContentType('sms').serialize({ phone: '+525512345678', message: 'Hola, ¿qué tal?' }),
+      getContentType('geo').serialize({ lat: '19.4326', lon: '-99.1332' }),
+    ];
+    for (const payload of casos) {
+      expect(roundTrip(payload), `falla con ${payload}`).toBe(payload);
+    }
+  });
 });
