@@ -520,6 +520,13 @@ body {
   cursor: pointer;
 }
 
+.eye-color__toggle input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
 .eye-color input[type="color"] {
   width: 32px;
   height: 32px;
@@ -578,11 +585,18 @@ input[type="file"]::file-selector-button {
   padding: calc(var(--mod) * 0.75) calc(var(--mod) * 1.5);
   font: inherit;
   font-size: 0.8125rem;
-  background: transparent;
+  font-weight: 500;
+  background: var(--glass-strong);
   color: var(--ink);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: var(--surface);
+  border-color: var(--ink);
 }
 
 label {
