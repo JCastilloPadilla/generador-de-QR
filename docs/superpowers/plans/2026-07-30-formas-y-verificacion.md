@@ -6,7 +6,7 @@
 
 **Architecture:** El cambio estructural es unificar la geometría. Hoy el canvas pinta píxeles y el SVG construye un `path`: dos implementaciones de la misma forma. Se sustituyen por un único módulo `geometry.ts` que produce descripciones de trazado en coordenadas de módulo; el canvas las rellena con `Path2D` y el SVG las incrusta literalmente. Sobre esa base, las formas son una variación del trazado y salen idénticas en ambos formatos.
 
-**Tech Stack:** Se añade `jsqr` como dependencia de producción (~10 KB) para la verificación. Sin cambios en el resto.
+**Tech Stack:** Se añade `jsqr` como dependencia de producción para la verificación. Al planificar se estimó en ~10 KB; medido en el build resultó ser 130 KB (47 KB comprimido), casi cuatro veces el resto de la aplicación, así que se carga en un chunk aparte mediante importación dinámica y la verificación pasa a ser asíncrona.
 
 ## Global Constraints
 

@@ -42,6 +42,9 @@ let logoDataUrl: string | null = null;
 
 const verifier = createVerifier();
 
+/** Identifica el render en curso, para descartar verificaciones caducadas. */
+let renderToken = 0;
+
 let lastType = initial.type;
 
 const store = createStore(initial, () => {
@@ -113,13 +116,22 @@ function render(): void {
     // Dos capas con significados distintos. La verificación decodifica el
     // código y prueba que se lee; el aviso de contraste advierte de que leerse
     // en pantalla no garantiza leerse impreso y con poca luz.
-    const verification = verifier(matrix, style, text);
-    setVerification(verification);
-    setAlert(
-      verification.state === 'ok'
-        ? realWorldCaution(state.foreground, state.background)
-        : null,
-    );
+    //
+    // La verificación es asíncrona porque el lector se carga aparte. El testigo
+    // descarta las respuestas que llegan tarde: sin él, una verificación lenta
+    // podría sobrescribir el resultado de un contenido posterior.
+    const token = ++renderToken;
+    setVerification({ state: 'pendiente', decoded: null, reason: null });
+    setAlert(null);
+    void verifier(matrix, style, text).then((verification) => {
+      if (token !== renderToken) return;
+      setVerification(verification);
+      setAlert(
+        verification.state === 'ok'
+          ? realWorldCaution(state.foreground, state.background)
+          : null,
+      );
+    });
     setDownloadable(true);
   } catch (error) {
     const message =
@@ -145,7 +157,9 @@ function setVerification(result: Verification | null): void {
   }
 
   verifyEl.dataset.state = result.state;
-  if (result.state === 'ok') {
+  if (result.state === 'pendiente') {
+    verifyEl.textContent = 'verificando…';
+  } else if (result.state === 'ok') {
     verifyEl.textContent = 'verificado · se lee y devuelve exactamente esto';
   } else if (result.state === 'difiere') {
     verifyEl.textContent = `se lee, pero devuelve otra cosa: ${result.decoded}`;

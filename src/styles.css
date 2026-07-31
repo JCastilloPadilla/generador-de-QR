@@ -180,6 +180,9 @@ body {
   font-size: 1rem;
 }
 
+.verify[data-state="pendiente"] { color: var(--muted); }
+.verify[data-state="pendiente"]::before { content: "·"; }
+
 .verify[data-state="ok"] { color: var(--ink); }
 .verify[data-state="ok"]::before { content: "✓"; }
 
