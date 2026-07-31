@@ -1,14 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import jsQR from 'jsqr';
 import { buildMatrix, type EccLevel } from '../src/qr-engine';
-import { renderToPixels } from '../src/renderer';
 import { getContentType } from '../src/content-types';
+import { rasterize } from './helpers/rasterize';
 
 /**
- * La prueba que de verdad importa: que lo renderizado se pueda volver a leer.
- * Un QR puede generarse sin errores y aun así no escanear — por una zona
- * silenciosa ausente, por bordes borrosos o por un escapado mal hecho.
- * Aquí se renderiza a píxeles y se decodifica con un lector independiente.
+ * Verifica el extremo de la codificación: que lo que se serializa vuelve
+ * exactamente como entró después de pasar por un QR real y un lector
+ * independiente. Es donde viven los errores silenciosos —escapados, juegos de
+ * caracteres— que no dan ningún síntoma hasta que alguien intenta escanear.
+ *
+ * Usa un rasterizador propio, no el de `src`, para no heredar sus errores. La
+ * geometría del dibujado se comprueba en `tests/geometry.test.ts`, y el
+ * renderizado completo con formas y logo lo verifica la propia app en vivo.
  */
 
 const NEGRO_SOBRE_BLANCO = { foreground: '#000000', background: '#FFFFFF' };
@@ -19,7 +23,7 @@ function roundTrip(
   style = NEGRO_SOBRE_BLANCO,
   sizePx = 512,
 ): string | null {
-  const pixels = renderToPixels(buildMatrix(text, ecc), sizePx, style);
+  const pixels = rasterize(buildMatrix(text, ecc), sizePx, style);
   const result = jsQR(pixels.data, pixels.width, pixels.height);
   return result ? result.data : null;
 }

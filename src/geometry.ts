@@ -1,5 +1,4 @@
 import type { QrMatrix } from './qr-engine';
-import { QUIET_ZONE } from './renderer';
 
 /**
  * Única descripción de la forma del código, en coordenadas de módulo.
@@ -9,6 +8,13 @@ import { QUIET_ZONE } from './renderer';
  * geometría —píxeles para el canvas, `path` para el SVG— y con formas variables
  * habrían divergido a la primera.
  */
+
+/**
+ * Módulos de margen obligatorio alrededor del código. Vive aquí, y no en el
+ * renderizador, porque es una propiedad de la geometría: su ausencia es la causa
+ * más común de códigos que no se leen.
+ */
+export const QUIET_ZONE = 4;
 
 export type BodyShape = 'square' | 'rounded' | 'dot' | 'fluid';
 export type EyeShape = 'square' | 'rounded' | 'circle' | 'leaf';

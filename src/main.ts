@@ -24,6 +24,8 @@ const initial: AppState = {
   sizePx: 512,
   foreground: '#15171C',
   background: '#FFFFFF',
+  eyeColor: null,
+  shape: { body: 'square', eye: 'square' },
   logo: null,
 };
 
@@ -87,6 +89,8 @@ function render(): void {
     drawToCanvas(canvas, matrix, state.sizePx, {
       foreground: state.foreground,
       background: state.background,
+      shape: state.shape,
+      eyeColor: state.eyeColor,
       logo: state.logo,
     });
     readoutEl.textContent =
@@ -132,7 +136,12 @@ svgBtn.addEventListener('click', () => {
     renderToSvg(
       matrix,
       state.sizePx,
-      { foreground: state.foreground, background: state.background },
+      {
+        foreground: state.foreground,
+        background: state.background,
+        shape: state.shape,
+        eyeColor: state.eyeColor,
+      },
       logoDataUrl,
     ),
     filename('svg'),

@@ -1,4 +1,5 @@
 import type { EccLevel } from './qr-engine';
+import type { ShapeStyle } from './geometry';
 
 export interface AppState {
   type: string;
@@ -7,6 +8,9 @@ export interface AppState {
   sizePx: number;
   foreground: string;
   background: string;
+  /** null = los ojos usan el color del cuerpo. */
+  eyeColor: string | null;
+  shape: ShapeStyle;
   logo: HTMLImageElement | null;
 }
 
