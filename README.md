@@ -36,9 +36,17 @@ npm test
 ```
 
 Los tests cubren la lógica donde un error pasa desapercibido: el escapado de WiFi, el
-formato de la vCard y el cálculo de contraste. Además, `tests/decode.test.ts` renderiza
-el código a píxeles y lo vuelve a leer con un decodificador independiente, porque un QR
-puede generarse sin errores y aun así no escanear.
+formato de la vCard y el cálculo de contraste.
+
+`tests/decode.test.ts` renderiza el código a píxeles y lo vuelve a leer con un
+decodificador independiente. Eso verifica el extremo de la codificación —que un SSID con
+`;` o un texto con acentos vuelven exactamente como entraron— en los cuatro niveles de
+corrección y los cuatro tamaños. **No** verifica la geometría del dibujado: los
+decodificadores toleran desplazamientos, espejados e incluso la ausencia de zona
+silenciosa, así que un round-trip correcto no demuestra que el renderizado lo sea.
+
+Por eso la zona silenciosa se comprueba aparte, en `tests/renderer.test.ts`, leyendo
+directamente los píxeles del borde contra el valor literal de 4 módulos.
 
 ## Compilar para producción
 
