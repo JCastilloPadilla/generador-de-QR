@@ -196,6 +196,105 @@ body {
   gap: var(--mod);
 }
 
+/* Selector de tipo de contenido ------------------------------------------- */
+
+.types {
+  display: flex;
+  gap: var(--mod);
+  flex-wrap: wrap;
+}
+
+.type { position: relative; }
+
+.type input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.type span {
+  display: block;
+  padding: var(--mod) calc(var(--mod) * 1.75);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-size: 0.875rem;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.type input:checked + span {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+.type input:focus-visible + span {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* Campos ------------------------------------------------------------------ */
+
+.fields {
+  display: grid;
+  gap: calc(var(--mod) * 2);
+}
+
+.field {
+  display: grid;
+  gap: calc(var(--mod) * 0.75);
+}
+
+/* Color ------------------------------------------------------------------- */
+
+.colors {
+  display: flex;
+  align-items: end;
+  gap: calc(var(--mod) * 2);
+  flex-wrap: wrap;
+}
+
+.color {
+  display: grid;
+  gap: calc(var(--mod) * 0.5);
+  justify-items: start;
+}
+
+.color input[type="color"] {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.color__hex {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+
+/* Logo -------------------------------------------------------------------- */
+
+input[type="file"] {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+input[type="file"]::file-selector-button {
+  margin-right: var(--mod);
+  padding: calc(var(--mod) * 0.75) calc(var(--mod) * 1.5);
+  font: inherit;
+  font-size: 0.8125rem;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
 label {
   font-size: 0.8125rem;
   font-weight: 500;
@@ -258,6 +357,12 @@ textarea {
 }
 
 .btn--primary:hover:not(:disabled) { background: #000; }
+
+.btn--quiet {
+  padding: var(--mod) calc(var(--mod) * 1.5);
+  font-size: 0.8125rem;
+  justify-self: start;
+}
 
 .actions {
   display: flex;

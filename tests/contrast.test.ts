@@ -27,10 +27,13 @@ describe('scanabilityWarning', () => {
     expect(scanabilityWarning('#000000', '#FFFFFF')).toBeNull();
   });
 
-  it('avisa cuando el contraste es bajo', () => {
-    const warning = scanabilityWarning('#777777', '#BBBBBB');
-    expect(warning).toBeTypeOf('string');
-    expect(warning).toContain('Contraste');
+  it('avisa sin alarmar en la banda intermedia', () => {
+    // #808080 sobre blanco ronda 3.9:1: por debajo de 4.5 pero por encima de 3.
+    const warning = scanabilityWarning('#808080', '#FFFFFF');
+    expect(contrastRatio('#808080', '#FFFFFF')).toBeGreaterThan(3);
+    expect(contrastRatio('#808080', '#FFFFFF')).toBeLessThan(4.5);
+    expect(warning).toContain('bajo');
+    expect(warning).not.toContain('no va a escanear');
   });
 
   it('avisa con más énfasis cuando el contraste es crítico', () => {
