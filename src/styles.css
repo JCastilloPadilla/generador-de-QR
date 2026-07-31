@@ -1,0 +1,275 @@
+/* Sistema de diseño ------------------------------------------------------
+ *
+ * La interfaz es monocroma a propósito: el único color libre en pantalla
+ * debe ser el que el usuario elige para su código. El acento cobalto solo
+ * aparece en foco y estado activo.
+ *
+ * Regla tipográfica: la monoespaciada es para lo que leerá la máquina
+ * (payload, versión, bytes, hex). La sans es para lo que lee la persona.
+ */
+
+:root {
+  --paper: #F6F7F9;
+  --surface: #FFFFFF;
+  --ink: #15171C;
+  --muted: #697184;
+  --line: #E1E4EA;
+  --signal: #1F3BE0;
+  --warn: #B4531A;
+
+  --font-ui: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", Consolas, monospace;
+
+  /* Toda medida de espaciado es múltiplo de un "módulo". */
+  --mod: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: calc(var(--mod) * 3) calc(var(--mod) * 2) calc(var(--mod) * 8);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Cabecera --------------------------------------------------------------- */
+
+.masthead {
+  max-width: 68ch;
+  margin: 0 auto calc(var(--mod) * 4);
+}
+
+.mark {
+  display: block;
+  width: 28px;
+  height: 28px;
+  color: var(--ink);
+}
+
+.masthead h1 {
+  margin: calc(var(--mod) * 1.5) 0 var(--mod);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.masthead__note {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* Layout ----------------------------------------------------------------- */
+
+.layout {
+  display: grid;
+  gap: calc(var(--mod) * 4);
+  max-width: 68ch;
+  margin: 0 auto;
+}
+
+@media (min-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr minmax(320px, 380px);
+    align-items: start;
+    max-width: 1080px;
+  }
+
+  .controls { order: -1; }
+
+  .stage {
+    position: sticky;
+    top: calc(var(--mod) * 3);
+  }
+}
+
+/* Escenario de vista previa ---------------------------------------------- */
+
+.stage {
+  display: grid;
+  gap: calc(var(--mod) * 2);
+}
+
+.stage__frame {
+  padding: calc(var(--mod) * 2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+#preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* Lecturas técnicas: siempre monoespaciada -------------------------------- */
+
+.readout {
+  margin: 0;
+  min-height: 1.2em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.payload {
+  display: grid;
+  gap: calc(var(--mod) * 0.5);
+}
+
+.payload__label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.payload__value {
+  max-height: 9em;
+  padding: var(--mod);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.alert {
+  margin: 0;
+  padding: var(--mod) calc(var(--mod) * 1.5);
+  background: var(--surface);
+  border-left: 2px solid var(--warn);
+  color: var(--warn);
+  font-size: 0.8125rem;
+}
+
+/* Controles --------------------------------------------------------------- */
+
+.controls {
+  display: grid;
+  gap: calc(var(--mod) * 3);
+}
+
+.group {
+  display: grid;
+  gap: calc(var(--mod) * 2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* El marcador reutiliza el patrón de localización de un QR: en un código le
+ * dice al escáner dónde empieza; aquí, dónde empieza un grupo de controles. */
+.group__title {
+  display: flex;
+  align-items: center;
+  gap: var(--mod);
+  padding: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.group__title::before {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--ink);
+  box-shadow: inset 0 0 0 1px var(--surface);
+}
+
+.row {
+  display: grid;
+  gap: var(--mod);
+}
+
+label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+input[type="text"], input[type="url"], input[type="password"], input[type="tel"],
+input[type="email"], textarea, select {
+  width: 100%;
+  padding: calc(var(--mod) * 1.25) calc(var(--mod) * 1.5);
+  font: inherit;
+  font-size: 0.9375rem;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+textarea {
+  min-height: 6em;
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* Botones ----------------------------------------------------------------- */
+
+.btn {
+  padding: calc(var(--mod) * 1.5) calc(var(--mod) * 2);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.btn:hover:not(:disabled) { border-color: var(--ink); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn--primary {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+
+.btn--primary:hover:not(:disabled) { background: #000; }
+
+.actions {
+  display: flex;
+  gap: var(--mod);
+  flex-wrap: wrap;
+}
+
+.actions .btn { flex: 1 1 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

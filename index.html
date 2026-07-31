@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generador de QR — sin servidor, sin rastreo</title>
+  <meta name="description" content="Genera códigos QR en tu navegador. El contenido nunca sale de tu dispositivo y el código apunta siempre al destino real." />
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <header class="masthead">
+    <svg class="mark" viewBox="0 0 7 7" aria-hidden="true">
+      <path d="M0 0h7v1H0zM0 6h7v1H0zM0 0h1v7H0zM6 0h1v7H6z" fill="currentColor"/>
+      <path d="M2 2h3v3H2z" fill="currentColor"/>
+    </svg>
+    <h1>Generador de QR</h1>
+    <p class="masthead__note">
+      Todo ocurre en tu navegador. Tu contenido no se envía a ningún servidor y el
+      código apunta al destino real, no a un redireccionamiento.
+    </p>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="Vista previa">
+      <div class="stage__frame">
+        <canvas id="preview" width="512" height="512" role="img"
+                aria-label="Vista previa del código QR"></canvas>
+      </div>
+      <p class="readout" id="readout"></p>
+      <div class="payload">
+        <span class="payload__label">se codifica exactamente esto</span>
+        <code class="payload__value" id="payload"></code>
+      </div>
+      <p class="alert" id="alert" role="status" hidden></p>
+      <div class="actions">
+        <button type="button" id="download-png" class="btn btn--primary">Descargar PNG</button>
+        <button type="button" id="download-svg" class="btn">Descargar SVG</button>
+      </div>
+    </section>
+
+    <form class="controls" id="controls" autocomplete="off">
+      <fieldset class="group">
+        <legend class="group__title">Contenido</legend>
+        <div class="types" id="types" role="radiogroup" aria-label="Tipo de contenido"></div>
+        <div class="fields" id="fields"></div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend class="group__title">Salida</legend>
+        <div class="row" id="ecc-row"></div>
+        <div class="row" id="size-row"></div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend class="group__title">Apariencia</legend>
+        <div class="row" id="color-row"></div>
+        <div class="row" id="logo-row"></div>
+      </fieldset>
+    </form>
+  </main>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
