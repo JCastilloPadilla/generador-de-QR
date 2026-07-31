@@ -159,6 +159,42 @@ body {
   line-height: 1.6;
 }
 
+/* Verificación de escaneo: la app lee su propio código y lo dice. Es una
+ * lectura de máquina, así que va en monoespaciada como el resto. */
+
+.verify {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--mod) * 0.75);
+  margin: 0;
+  min-height: 1.4em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.verify::before {
+  content: "·";
+  flex: none;
+  font-size: 1rem;
+}
+
+.verify[data-state="pendiente"] { color: var(--muted); }
+.verify[data-state="pendiente"]::before { content: "·"; }
+
+.verify[data-state="ok"] { color: var(--ink); }
+.verify[data-state="ok"]::before { content: "✓"; }
+
+.verify[data-state="ilegible"],
+.verify[data-state="difiere"] {
+  color: var(--warn);
+  font-weight: 500;
+}
+
+.verify[data-state="ilegible"]::before,
+.verify[data-state="difiere"]::before { content: "✕"; }
+
 .alert {
   margin: 0;
   padding: var(--mod) calc(var(--mod) * 1.5);
@@ -259,6 +295,100 @@ body {
   gap: calc(var(--mod) * 0.75);
 }
 
+/* Formas ------------------------------------------------------------------ */
+
+.shapes {
+  display: grid;
+  gap: var(--mod);
+}
+
+.shapes__title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.shapes__row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--mod);
+}
+
+.shape { position: relative; }
+
+.shape input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.shape__box {
+  display: grid;
+  justify-items: center;
+  gap: calc(var(--mod) * 0.5);
+  padding: var(--mod) calc(var(--mod) * 0.5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--ink);
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.shape__box svg {
+  width: 22px;
+  height: 22px;
+}
+
+.shape__label {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--muted);
+}
+
+.shape input:checked + .shape__box {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+.shape input:checked + .shape__box .shape__label { color: var(--signal); }
+
+.shape input:focus-visible + .shape__box {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.eye-color {
+  display: flex;
+  align-items: center;
+  gap: var(--mod);
+  flex-wrap: wrap;
+}
+
+.eye-color__toggle {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--mod) * 0.75);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.eye-color input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.eye-color input[type="color"]:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 /* Color ------------------------------------------------------------------- */
 
 .colors {
@@ -315,7 +445,8 @@ label {
 }
 
 input[type="text"], input[type="url"], input[type="password"], input[type="tel"],
-input[type="email"], textarea, select {
+input[type="email"], input[type="number"], input[type="datetime-local"],
+textarea, select {
   width: 100%;
   padding: calc(var(--mod) * 1.25) calc(var(--mod) * 1.5);
   font: inherit;

@@ -39,6 +39,17 @@ export function defaultValues(typeId: string): Record<string, string> {
   return values;
 }
 
+/** Tipos de campo que el navegador dibuja como un `input` corriente. */
+const INPUT_TYPES = new Set([
+  'text',
+  'url',
+  'password',
+  'tel',
+  'email',
+  'number',
+  'datetime-local',
+]);
+
 function fieldMarkup(field: FieldDef, value: string): string {
   const id = `field-${field.name}`;
   const hint = field.hint ? `<p class="hint">${field.hint}</p>` : '';
@@ -66,9 +77,10 @@ function fieldMarkup(field: FieldDef, value: string): string {
     </div>`;
   }
 
+  const inputType = INPUT_TYPES.has(field.type) ? field.type : 'text';
   return `<div class="field">
     <label for="${id}">${field.label}</label>
-    <input type="${field.type}" id="${id}" data-field="${field.name}"
+    <input type="${inputType}" id="${id}" data-field="${field.name}"
            value="${escapeHtml(value)}" placeholder="${placeholder}" />
     ${hint}
   </div>`;

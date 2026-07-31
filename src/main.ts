@@ -2,16 +2,24 @@ import './styles.css';
 import { buildMatrix, QrCapacityError } from './qr-engine';
 import { drawToCanvas, renderToSvg } from './renderer';
 import { downloadPng, downloadSvg } from './export';
-import { scanabilityWarning } from './contrast';
+import { realWorldCaution } from './contrast';
+import { createVerifier, type Verification } from './verify';
 import { getContentType } from './content-types';
 import { createStore, type AppState } from './state';
-import { mountEccControl, mountSizeControl, mountColorControl, mountLogoControl } from './ui/controls';
+import {
+  mountEccControl,
+  mountSizeControl,
+  mountColorControl,
+  mountShapeControl,
+  mountLogoControl,
+} from './ui/controls';
 import { mountTypePicker, mountFields, renderFields, defaultValues } from './ui/fields';
 
 const canvas = document.querySelector<HTMLCanvasElement>('#preview')!;
 const payloadEl = document.querySelector<HTMLElement>('#payload')!;
 const readoutEl = document.querySelector<HTMLElement>('#readout')!;
 const alertEl = document.querySelector<HTMLElement>('#alert')!;
+const verifyEl = document.querySelector<HTMLElement>('#verify')!;
 const fieldsEl = document.querySelector<HTMLElement>('#fields')!;
 const typesEl = document.querySelector<HTMLElement>('#types')!;
 const pngBtn = document.querySelector<HTMLButtonElement>('#download-png')!;
@@ -24,11 +32,18 @@ const initial: AppState = {
   sizePx: 512,
   foreground: '#15171C',
   background: '#FFFFFF',
+  eyeColor: null,
+  shape: { body: 'square', eye: 'square' },
   logo: null,
 };
 
 /** El logo se guarda además como data URI para poder incrustarlo en el SVG. */
 let logoDataUrl: string | null = null;
+
+const verifier = createVerifier();
+
+/** Identifica el render en curso, para descartar verificaciones caducadas. */
+let renderToken = 0;
 
 let lastType = initial.type;
 
@@ -46,6 +61,7 @@ mountFields(fieldsEl, store);
 
 const eccControl = mountEccControl(document.querySelector<HTMLElement>('#ecc-row')!, store);
 mountSizeControl(document.querySelector<HTMLElement>('#size-row')!, store);
+mountShapeControl(document.querySelector<HTMLElement>('#shape-row')!, store);
 mountColorControl(document.querySelector<HTMLElement>('#color-row')!, store);
 mountLogoControl(document.querySelector<HTMLElement>('#logo-row')!, store, (dataUrl) => {
   logoDataUrl = dataUrl;
@@ -77,6 +93,7 @@ function render(): void {
   if (!text) {
     clearCanvas();
     readoutEl.textContent = '';
+    setVerification(null);
     setAlert(null);
     setDownloadable(false);
     return;
@@ -84,21 +101,44 @@ function render(): void {
 
   try {
     const matrix = buildMatrix(text, state.ecc);
-    drawToCanvas(canvas, matrix, state.sizePx, {
+    const style = {
       foreground: state.foreground,
       background: state.background,
+      shape: state.shape,
+      eyeColor: state.eyeColor,
       logo: state.logo,
-    });
+    };
+    drawToCanvas(canvas, matrix, state.sizePx, style);
     readoutEl.textContent =
       `v${matrix.version} · ${matrix.size}×${matrix.size} módulos · ECC ${matrix.ecc} · ` +
       `${new TextEncoder().encode(text).length} bytes`;
-    setAlert(scanabilityWarning(state.foreground, state.background));
+
+    // Dos capas con significados distintos. La verificación decodifica el
+    // código y prueba que se lee; el aviso de contraste advierte de que leerse
+    // en pantalla no garantiza leerse impreso y con poca luz.
+    //
+    // La verificación es asíncrona porque el lector se carga aparte. El testigo
+    // descarta las respuestas que llegan tarde: sin él, una verificación lenta
+    // podría sobrescribir el resultado de un contenido posterior.
+    const token = ++renderToken;
+    setVerification({ state: 'pendiente', decoded: null, reason: null });
+    setAlert(null);
+    void verifier(matrix, style, text).then((verification) => {
+      if (token !== renderToken) return;
+      setVerification(verification);
+      setAlert(
+        verification.state === 'ok'
+          ? realWorldCaution(state.foreground, state.background)
+          : null,
+      );
+    });
     setDownloadable(true);
   } catch (error) {
     const message =
       error instanceof QrCapacityError ? error.message : 'No se pudo generar el código.';
     clearCanvas();
     readoutEl.textContent = '';
+    setVerification(null);
     setAlert(message);
     setDownloadable(false);
   }
@@ -107,6 +147,25 @@ function render(): void {
 function clearCanvas(): void {
   const ctx = canvas.getContext('2d');
   if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function setVerification(result: Verification | null): void {
+  if (!result) {
+    verifyEl.removeAttribute('data-state');
+    verifyEl.textContent = '';
+    return;
+  }
+
+  verifyEl.dataset.state = result.state;
+  if (result.state === 'pendiente') {
+    verifyEl.textContent = 'verificando…';
+  } else if (result.state === 'ok') {
+    verifyEl.textContent = 'verificado · se lee y devuelve exactamente esto';
+  } else if (result.state === 'difiere') {
+    verifyEl.textContent = `se lee, pero devuelve otra cosa: ${result.decoded}`;
+  } else {
+    verifyEl.textContent = `no se lee · ${result.reason}`;
+  }
 }
 
 function setAlert(message: string | null): void {
@@ -132,7 +191,12 @@ svgBtn.addEventListener('click', () => {
     renderToSvg(
       matrix,
       state.sizePx,
-      { foreground: state.foreground, background: state.background },
+      {
+        foreground: state.foreground,
+        background: state.background,
+        shape: state.shape,
+        eyeColor: state.eyeColor,
+      },
       logoDataUrl,
     ),
     filename('svg'),

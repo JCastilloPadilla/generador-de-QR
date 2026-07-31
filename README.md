@@ -7,10 +7,13 @@ sale del dispositivo y el código apunta siempre al destino final directo.
 
 **Lo que hace**
 
-- Genera códigos QR de enlaces, texto, redes WiFi y contactos (vCard).
+- Genera códigos QR de nueve tipos: enlace, texto, WiFi, contacto (vCard), llamada,
+  SMS, correo, ubicación y evento de calendario.
 - Exporta a PNG (cuatro tamaños) y a SVG vectorial.
-- Permite elegir el nivel de corrección de errores, los colores y un logo central.
+- Permite elegir el nivel de corrección de errores, los colores, la forma de los módulos
+  y de las esquinas, y un logo central.
 - Muestra en todo momento la cadena exacta que se está codificando.
+- **Se verifica a sí mismo**: decodifica el código que acaba de dibujar y dice si se lee.
 
 **Lo que no hace, a propósito**
 
@@ -97,15 +100,19 @@ content-types.ts   formulario            →  cadena final a codificar
         ↓
 qr-engine.ts       cadena + nivel ECC    →  matriz de módulos
         ↓
-renderer.ts        matriz                →  canvas  |  SVG
+geometry.ts        matriz + forma        →  trazados en coordenadas de módulo
         ↓
-export.ts          canvas / SVG          →  descarga PNG | SVG
+renderer.ts        trazados               →  canvas  |  SVG
+        ↓                                        ↓
+export.ts          descarga PNG | SVG      verify.ts  ¿se vuelve a leer?
 ```
 
 | Archivo | Responsabilidad |
 |---|---|
 | `src/qr-engine.ts` | Único módulo que conoce la librería `qrcode`. Devuelve la matriz cruda. |
-| `src/renderer.ts` | Dibuja la matriz en canvas y en SVG. Zona silenciosa, color y logo. |
+| `src/geometry.ts` | Traduce la matriz a trazados en coordenadas de módulo. Formas y zona silenciosa. |
+| `src/renderer.ts` | Lleva esos trazados a canvas y a SVG. Color y logo. |
+| `src/verify.ts` | Decodifica el código dibujado y explica la causa probable si no se lee. |
 | `src/content-types.ts` | Los cuatro tipos, declarados como dato: campos y serialización. |
 | `src/contrast.ts` | Luminancia relativa y avisos de escaneabilidad. |
 | `src/export.ts` | Descargas mediante blobs locales. |
@@ -118,6 +125,27 @@ admiten un logo superpuesto ni control fino del dibujado. Partiendo de la matriz
 el SVG salen de la misma fuente de verdad y son idénticos, y la lógica de color, zona
 silenciosa y logo vive en un solo sitio. La librería sigue resolviendo lo difícil:
 corrección de errores Reed-Solomon y selección de máscara.
+
+## Las tres capas de verificación, y qué garantiza cada una
+
+Ninguna sustituye a las otras. Están ordenadas de más barata a más real.
+
+| Capa | Qué comprueba | Qué **no** comprueba |
+|---|---|---|
+| `tests/decode.test.ts` | Que lo serializado vuelve idéntico tras pasar por un QR y un lector. Cubre escapados y juegos de caracteres. | La geometría del dibujado: los lectores toleran desplazamientos, espejados y hasta la falta de zona silenciosa. |
+| `tests/geometry.test.ts` | Que el trazado respeta la zona silenciosa y excluye los patrones de localización, en las 16 combinaciones de forma. | Que el resultado se lea. |
+| Verificación en vivo (`src/verify.ts`) | Que el código real —con su forma, sus colores y su logo— se decodifica y devuelve lo esperado. | Que se lea **impreso**, en papel y con poca luz. De eso avisa `contrast.ts`. |
+
+La verificación en vivo no bloquea la descarga. Muestra la evidencia y la decisión sigue
+siendo del usuario: hay combinaciones que un lector rechaza y una cámara concreta acepta.
+
+El lector pesa 130 KB, casi cuatro veces el resto de la aplicación junta, así que se carga
+en un chunk aparte en cuanto termina la primera pintada. El código aparece al instante y
+la verificación llega un momento después, sin retrasar nada.
+
+Esta capa ya se ganó el sueldo: detectó que la forma de punto con radio 0.42 no se leía
+en ninguna de sus combinaciones, porque los huecos entre módulos parten el patrón de
+sincronización.
 
 ## Detalles que determinan si un código escanea
 

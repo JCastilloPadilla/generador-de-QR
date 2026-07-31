@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { buildMatrix } from '../src/qr-engine';
 import { renderToSvg, QUIET_ZONE } from '../src/renderer';
+import { isFinderModule } from '../src/geometry';
 
-const style = { foreground: '#000000', background: '#ffffff' };
+const style = {
+  foreground: '#000000',
+  background: '#ffffff',
+  shape: { body: 'square', eye: 'square' },
+} as const;
 
 describe('renderToSvg', () => {
   it('declara un viewBox que incluye las dos zonas silenciosas', () => {
@@ -21,6 +26,7 @@ describe('renderToSvg', () => {
 
   it('usa los colores indicados', () => {
     const svg = renderToSvg(buildMatrix('hola', 'M'), 512, {
+      ...style,
       foreground: '#1F3BE0',
       background: '#F6F7F9',
     });
@@ -28,15 +34,41 @@ describe('renderToSvg', () => {
     expect(svg).toContain('#F6F7F9');
   });
 
-  it('dibuja un subpath por cada módulo oscuro de la matriz', () => {
+  it('permite dar a los ojos un color propio', () => {
+    const svg = renderToSvg(buildMatrix('hola', 'M'), 512, {
+      ...style,
+      foreground: '#15171C',
+      eyeColor: '#1F3BE0',
+    });
+    expect(svg).toContain('fill="#15171C"');
+    expect(svg).toContain('fill="#1F3BE0"');
+  });
+
+  it('separa el cuerpo de los ojos en dos trazados', () => {
+    const svg = renderToSvg(buildMatrix('hola', 'M'), 512, style);
+    expect((svg.match(/<path /g) ?? []).length).toBe(2);
+    expect(svg).toContain('fill-rule="evenodd"');
+  });
+
+  it('dibuja un subpath por cada módulo oscuro que no es patrón de localización', () => {
     const matrix = buildMatrix('hola', 'M');
     let dark = 0;
     for (let r = 0; r < matrix.size; r++) {
-      for (let c = 0; c < matrix.size; c++) if (matrix.get(r, c)) dark++;
+      for (let c = 0; c < matrix.size; c++) {
+        if (matrix.get(r, c) && !isFinderModule(matrix, r, c)) dark++;
+      }
     }
     const svg = renderToSvg(matrix, 512, style);
-    const path = svg.match(/<path d="([^"]*)"/)?.[1] ?? '';
-    expect((path.match(/M/g) ?? []).length).toBe(dark);
+    const body = svg.match(/<path d="([^"]*)"/)?.[1] ?? '';
+    expect((body.match(/M/g) ?? []).length).toBe(dark);
+  });
+
+  it('declara crispEdges solo con la forma cuadrada', () => {
+    const matrix = buildMatrix('hola', 'M');
+    expect(renderToSvg(matrix, 512, style)).toContain('crispEdges');
+    expect(
+      renderToSvg(matrix, 512, { ...style, shape: { body: 'dot', eye: 'circle' } }),
+    ).not.toContain('crispEdges');
   });
 
   it('incrusta el logo cuando se le pasa un href', () => {

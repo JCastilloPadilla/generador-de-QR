@@ -1,13 +1,13 @@
 import type { QrMatrix } from './qr-engine';
+import { buildGeometry, QUIET_ZONE, type ShapeStyle } from './geometry';
 
 /**
- * Canvas y SVG se dibujan aquí, a partir de la misma matriz, para que el PNG y
- * el SVG exportados sean idénticos y la lógica de color, zona silenciosa y logo
- * viva en un solo sitio.
+ * Canvas y SVG se dibujan a partir de la misma geometría, de modo que el PNG y
+ * el SVG exportados son idénticos por construcción y la lógica de color, zona
+ * silenciosa y logo vive en un solo sitio.
  */
 
-/** Módulos de margen obligatorio alrededor del código. */
-export const QUIET_ZONE = 4;
+export { QUIET_ZONE };
 
 /** Proporción del lado del QR que puede ocupar el logo. */
 export const LOGO_RATIO = 0.22;
@@ -15,75 +15,27 @@ export const LOGO_RATIO = 0.22;
 export interface RenderStyle {
   foreground: string;
   background: string;
+  shape: ShapeStyle;
+  /** Color propio de los patrones de localización. null = el del cuerpo. */
+  eyeColor?: string | null;
   logo?: HTMLImageElement | null;
 }
 
 /**
  * Píxeles por módulo, redondeado a entero. Un módulo de tamaño fraccionario
- * produce bordes borrosos por antialiasing, y los bordes borrosos son la
- * segunda causa de códigos que no escanean.
+ * produce bordes borrosos por antialiasing, y los bordes borrosos son una de las
+ * causas más comunes de códigos que no escanean.
  */
 export function modulePixelSize(matrix: QrMatrix, sizePx: number): number {
   const total = matrix.size + QUIET_ZONE * 2;
   return Math.max(1, Math.floor(sizePx / total));
 }
 
-function parseHex(hex: string): [number, number, number] {
-  let value = hex.replace('#', '').trim();
-  if (value.length === 3) {
-    value = value
-      .split('')
-      .map((c) => c + c)
-      .join('');
-  }
-  const int = Number.parseInt(value, 16);
-  return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
-}
-
-/**
- * Píxeles del código, sin logo. Es la verdad de lo que se dibuja, y al ser una
- * función pura se puede decodificar en un test sin necesidad de un navegador.
- */
-export function renderToPixels(
-  matrix: QrMatrix,
-  sizePx: number,
-  style: RenderStyle,
-): { data: Uint8ClampedArray<ArrayBuffer>; width: number; height: number } {
+/** Escala y desplazamiento para centrar el código en un lienzo cuadrado. */
+function layout(matrix: QrMatrix, sizePx: number): { scale: number; offset: number } {
   const scale = modulePixelSize(matrix, sizePx);
   const drawn = (matrix.size + QUIET_ZONE * 2) * scale;
-  const offset = Math.floor((sizePx - drawn) / 2);
-
-  const [br, bg, bb] = parseHex(style.background);
-  const [fr, fg, fb] = parseHex(style.foreground);
-
-  const data = new Uint8ClampedArray(new ArrayBuffer(sizePx * sizePx * 4));
-  for (let i = 0; i < data.length; i += 4) {
-    data[i] = br;
-    data[i + 1] = bg;
-    data[i + 2] = bb;
-    data[i + 3] = 255;
-  }
-
-  const paint = (x: number, y: number): void => {
-    if (x < 0 || y < 0 || x >= sizePx || y >= sizePx) return;
-    const i = (y * sizePx + x) * 4;
-    data[i] = fr;
-    data[i + 1] = fg;
-    data[i + 2] = fb;
-  };
-
-  for (let row = 0; row < matrix.size; row++) {
-    for (let col = 0; col < matrix.size; col++) {
-      if (!matrix.get(row, col)) continue;
-      const left = offset + (col + QUIET_ZONE) * scale;
-      const top = offset + (row + QUIET_ZONE) * scale;
-      for (let y = 0; y < scale; y++) {
-        for (let x = 0; x < scale; x++) paint(left + x, top + y);
-      }
-    }
-  }
-
-  return { data, width: sizePx, height: sizePx };
+  return { scale, offset: Math.floor((sizePx - drawn) / 2) };
 }
 
 export function drawToCanvas(
@@ -98,13 +50,26 @@ export function drawToCanvas(
   canvas.width = sizePx;
   canvas.height = sizePx;
 
-  const pixels = renderToPixels(matrix, sizePx, style);
-  ctx.putImageData(new ImageData(pixels.data, pixels.width, pixels.height), 0, 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = style.background;
+  ctx.fillRect(0, 0, sizePx, sizePx);
+
+  const { scale, offset } = layout(matrix, sizePx);
+  const geometry = buildGeometry(matrix, style.shape);
+
+  // Se trabaja en coordenadas de módulo y se deja que el canvas escale: así el
+  // trazado dibujado es exactamente el mismo que se incrusta en el SVG.
+  ctx.setTransform(scale, 0, 0, scale, offset, offset);
+
+  ctx.fillStyle = style.foreground;
+  ctx.fill(new Path2D(geometry.body));
+
+  ctx.fillStyle = style.eyeColor ?? style.foreground;
+  ctx.fill(new Path2D(geometry.eyes), 'evenodd');
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 
   if (style.logo) {
-    const scale = modulePixelSize(matrix, sizePx);
-    const drawn = (matrix.size + QUIET_ZONE * 2) * scale;
-    const offset = Math.floor((sizePx - drawn) / 2);
     drawLogo(ctx, style, matrix.size * scale, offset + QUIET_ZONE * scale);
   }
 }
@@ -136,8 +101,9 @@ function drawLogo(
 }
 
 /**
- * SVG con coordenadas en módulos (viewBox = módulos totales) y un único `path`
- * para todos los módulos oscuros: el archivo queda pequeño y escala sin pérdida.
+ * SVG con coordenadas en módulos: el archivo queda pequeño y escala sin pérdida.
+ * `shape-rendering="crispEdges"` solo se declara con la forma cuadrada; en
+ * cuanto hay bordes curvos hace falta el suavizado.
  */
 export function renderToSvg(
   matrix: QrMatrix,
@@ -146,21 +112,16 @@ export function renderToSvg(
   logoHref?: string | null,
 ): string {
   const total = matrix.size + QUIET_ZONE * 2;
-
-  let path = '';
-  for (let row = 0; row < matrix.size; row++) {
-    for (let col = 0; col < matrix.size; col++) {
-      if (matrix.get(row, col)) {
-        path += `M${col + QUIET_ZONE} ${row + QUIET_ZONE}h1v1h-1z`;
-      }
-    }
-  }
-
+  const geometry = buildGeometry(matrix, style.shape);
+  const nitido = style.shape.body === 'square' && style.shape.eye === 'square';
   const logo = logoHref ? logoMarkup(matrix.size, logoHref, style.background) : '';
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}" shape-rendering="crispEdges">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}"${
+    nitido ? ' shape-rendering="crispEdges"' : ''
+  }>
 <rect width="${total}" height="${total}" fill="${style.background}"/>
-<path d="${path}" fill="${style.foreground}"/>${logo}
+<path d="${geometry.body}" fill="${style.foreground}"/>
+<path d="${geometry.eyes}" fill="${style.eyeColor ?? style.foreground}" fill-rule="evenodd"/>${logo}
 </svg>`;
 }
 
