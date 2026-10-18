@@ -13,6 +13,7 @@ Sin cuentas, publicidad ni redirecciones gestionadas por este proyecto.
 ![TypeScript](https://img.shields.io/badge/TypeScript-estricto-15181F?style=flat-square)
 ![Exportación](https://img.shields.io/badge/exporta-PNG%20%C2%B7%20SVG-15181F?style=flat-square)
 ![Procesamiento](https://img.shields.io/badge/procesamiento-local-15181F?style=flat-square)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-15181F?style=flat-square)](LICENSE)
 
 [Empezar](#ejecutarlo-en-local) · [Arquitectura](docs/ARCHITECTURE.md) · [Despliegue](docs/DEPLOYMENT.md) · [Contribuir](CONTRIBUTING.md) · [Reportar un problema](https://github.com/JCastilloPadilla/generador-de-QR/issues/new/choose)
 
@@ -107,8 +108,9 @@ GitHub Actions ejecuta las pruebas y la compilación en cada push a main y pull 
 El proyecto se centra en códigos estáticos y procesamiento local. Los códigos dinámicos,
 las cuentas y la analítica de escaneos quedan fuera de su alcance.
 
-El repositorio todavía no declara una licencia de uso o redistribución. Que el código sea
-visible no equivale a conceder esos permisos; consulta al autor antes de reutilizarlo.
+Distribuido bajo la [licencia MIT](LICENSE). Puedes usar, modificar y redistribuir el
+proyecto, incluso comercialmente, conservando el aviso de autoría y la licencia.
+Las dependencias mantienen sus propias licencias.
 
 ---
 

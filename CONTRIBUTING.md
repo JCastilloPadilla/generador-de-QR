@@ -38,5 +38,5 @@ ficticios: no adjuntes contraseñas WiFi, contactos privados ni códigos con inf
 Para añadir un tipo de contenido, revisa `src/content-types.ts` y sus pruebas. Para formas
 y exportación, revisa `src/geometry.ts` y `src/renderer.ts`.
 
-La licencia del proyecto sigue pendiente de definición; esta guía no concede permisos
-adicionales de uso o redistribución.
+El proyecto se distribuye bajo la [licencia MIT](LICENSE). Las contribuciones se reciben
+bajo esa misma licencia.

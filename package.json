@@ -2,6 +2,7 @@
   "name": "generador-de-qr",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
   "description": "Generador de códigos QR que funciona por completo en el navegador.",
   "type": "module",
   "scripts": {
