@@ -1,182 +1,115 @@
-# QR
+<div align="center">
 
-Generador de códigos QR estáticos, personalizados y privados. Todo ocurre en el navegador:
-el contenido nunca sale del dispositivo y cada código apunta directamente a su destino, sin
-acortadores ni redirecciones intermedias.
+![QR — tu contenido, directo al código](docs/assets/readme-cover.svg)
 
-La interfaz está pensada para crear y descargar códigos QR con rapidez, manteniendo una
-vista clara de lo que se codifica y una verificación de lectura en tiempo real.
+# Generador de QR
 
-## Características
+**Códigos estáticos. Diseño propio. Procesamiento local.**
 
-- Nueve formatos: enlace, texto, WiFi, contacto, llamada, SMS, correo, ubicación y evento.
-- Descarga en PNG (256 a 2048 px) y SVG vectorial.
-- Personalización de colores, módulos, patrones de esquina y logo central.
-- Verificación local: la aplicación vuelve a leer el QR generado antes de descargarlo.
-- Sin backend, cuentas, analítica ni códigos dinámicos.
-- Fondo animado sutil mediante `@paper-design/shaders-react`, sin interferir con los controles.
+Genera, personaliza y descarga códigos QR cuyo contenido se codifica directamente en tu navegador.
+Sin cuentas, publicidad ni redirecciones gestionadas por este proyecto.
 
-## Qué es, y qué no es
+[![Validación](https://github.com/JCastilloPadilla/generador-de-QR/actions/workflows/ci.yml/badge.svg)](https://github.com/JCastilloPadilla/generador-de-QR/actions/workflows/ci.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-estricto-15181F?style=flat-square)
+![Exportación](https://img.shields.io/badge/exporta-PNG%20%C2%B7%20SVG-15181F?style=flat-square)
+![Procesamiento](https://img.shields.io/badge/procesamiento-local-15181F?style=flat-square)
 
-**Lo que hace**
+[Empezar](#ejecutarlo-en-local) · [Arquitectura](docs/ARCHITECTURE.md) · [Despliegue](docs/DEPLOYMENT.md) · [Contribuir](CONTRIBUTING.md) · [Reportar un problema](https://github.com/JCastilloPadilla/generador-de-QR/issues/new/choose)
 
-- Genera códigos QR de nueve tipos: enlace, texto, WiFi, contacto (vCard), llamada,
-  SMS, correo, ubicación y evento de calendario.
-- Exporta a PNG (cuatro tamaños) y a SVG vectorial.
-- Permite elegir el nivel de corrección de errores, los colores, la forma de los módulos
-  y de las esquinas, y un logo central.
-- Muestra en todo momento la cadena exacta que se está codificando.
-- **Se verifica a sí mismo**: decodifica el código que acaba de dibujar y dice si se lee.
+</div>
 
-**Lo que no hace, a propósito**
+## Un QR que contiene lo que ves
 
-- **No genera códigos dinámicos.** No existe una URL intermedia propia que redirija.
-  Un código dinámico deja de funcionar el día que el servicio cierra, y permite contar
-  quién escanea. Aquí el código contiene el destino real y no depende de nadie.
-- **No envía nada a ningún servidor.** No hay backend. El cálculo del patrón, el
-  renderizado, el logo y las descargas ocurren en el navegador.
-- **No hay cuentas, ni publicidad, ni analítica individual.**
+La aplicación muestra la cadena exacta que se está codificando. Una URL queda grabada como URL;
+una red WiFi, como sus datos de conexión. No se crea un enlace corto propio que dependa de
+un servicio de redirección.
 
-## Desarrollo
+Los códigos no tienen una caducidad impuesta por el generador. Si apuntan a una página,
+su utilidad sigue dependiendo de que esa página esté disponible.
+
+## Qué puedes hacer
+
+| Contenido | Opciones |
+| --- | --- |
+| Enlace y texto | URLs directas y texto libre, incluidos acentos y emoji. |
+| WiFi | Nombre de red, seguridad y contraseña. |
+| Contacto | Nombre, teléfono, correo y empresa en vCard. |
+| Llamada y SMS | Número de teléfono y mensaje preparado. |
+| Correo | Destinatario, asunto y cuerpo. |
+| Ubicación | Coordenadas geográficas. |
+| Evento | Título, fechas, lugar y descripción. |
+
+- **Personaliza el patrón:** módulos cuadrados, redondeados, de punto o fluidos; esquinas cuadradas, redondeadas, circulares o de hoja.
+- **Elige los colores:** frente, fondo y un color independiente para las esquinas.
+- **Añade un logo:** se procesa localmente y activa automáticamente la corrección de errores H.
+- **Descarga PNG o SVG:** PNG de 256, 512, 1024 o 2048 px; SVG vectorial para escalar.
+- **Comprueba la lectura:** un lector local verifica una representación del diseño a 512 px, con sus formas, colores y logo. Informa del resultado sin bloquear la descarga.
+
+> La verificación en pantalla es una ayuda, no una garantía de lectura impresa. Antes de imprimir,
+> prueba el archivo final al tamaño real con la cámara de tu teléfono.
+
+## Privacidad por diseño
+
+El contenido, los datos de conexión y el logo se procesan en el dispositivo. La aplicación
+no incorpora backend, cuentas, publicidad ni analítica de escaneos. Las dependencias se empaquetan
+con el sitio; no se necesitan APIs externas para generar o verificar códigos.
+
+Una vez cargados los recursos de la aplicación, puedes seguir generando y descargando sin conexión
+en esa pestaña. No incluye instalación PWA ni garantiza una nueva carga sin internet.
+
+Esto describe el generador: abrir el destino de un QR puede conectarte a servicios externos,
+y el servidor que aloje el sitio puede conservar sus propios registros de acceso.
+
+## Ejecutarlo en local
+
+Necesitas **Node.js 22.13 o superior** y npm (recomendado: la última versión 22 LTS).
 
 ```bash
-npm install
-```
-
-```bash
+git clone https://github.com/JCastilloPadilla/generador-de-QR.git
+cd generador-de-QR
+npm ci
 npm run dev
 ```
 
-Abre la URL local que muestre Vite. Para crear una compilación de producción:
+Abre la dirección que muestre Vite, elige el tipo de contenido y completa sus campos.
+La vista previa se actualiza mientras escribes; después puedes ajustar el diseño y descargarlo.
 
-```bash
-npm run build
+| Comando | Uso |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo. |
+| `npm test` | Suite de pruebas. |
+| `npm run test:watch` | Pruebas en modo observación. |
+| `npm run build` | Comprobación de tipos y compilación estática en `dist/`. |
+| `npm run preview` | Revisión local de la compilación. |
+
+## Tecnología y arquitectura
+
+**TypeScript + Vite**, interfaz con DOM nativo y CSS. React se utiliza en el fondo animado,
+que se carga por separado. `qrcode` calcula la matriz y `jsQR` comprueba la lectura local.
+
+```text
+Campos → contenido final → matriz QR → geometría compartida → canvas / SVG
+                                                                  │
+                                                     verificación y descarga
 ```
 
-```bash
-npm test
-```
+El renderizado propio permite personalizar las formas y conservar una geometría común entre
+PNG y SVG. Las pruebas cubren serialización, escapados, geometría, contraste y decodificación.
+GitHub Actions ejecuta las pruebas y la compilación en cada push a main y pull request.
 
-Los tests cubren la lógica donde un error pasa desapercibido: el escapado de WiFi, el
-formato de la vCard y el cálculo de contraste.
+- [Arquitectura y límites de la verificación](docs/ARCHITECTURE.md)
+- [Despliegue estático con Nginx](docs/DEPLOYMENT.md)
+- [Guía de contribución](CONTRIBUTING.md)
+- [Comunicación de vulnerabilidades](SECURITY.md)
 
-`tests/decode.test.ts` renderiza el código a píxeles y lo vuelve a leer con un
-decodificador independiente. Eso verifica el extremo de la codificación —que un SSID con
-`;` o un texto con acentos vuelven exactamente como entraron— en los cuatro niveles de
-corrección y los cuatro tamaños. **No** verifica la geometría del dibujado: los
-decodificadores toleran desplazamientos, espejados e incluso la ausencia de zona
-silenciosa, así que un round-trip correcto no demuestra que el renderizado lo sea.
+## Alcance y licencia
 
-Por eso la zona silenciosa se comprueba aparte, en `tests/renderer.test.ts`, leyendo
-directamente los píxeles del borde contra el valor literal de 4 módulos.
+El proyecto se centra en códigos estáticos y procesamiento local. Los códigos dinámicos,
+las cuentas y la analítica de escaneos quedan fuera de su alcance.
 
-## Compilar para producción
+El repositorio todavía no declara una licencia de uso o redistribución. Que el código sea
+visible no equivale a conceder esos permisos; consulta al autor antes de reutilizarlo.
 
-`npm run build` genera `dist/` con archivos estáticos. `npm run preview` sirve ese build en local para
-comprobarlo antes de subirlo.
+---
 
-`vite.config.ts` usa `base: './'`, así que el mismo `dist/` funciona tanto en un
-subdominio (`qr.ccastillo.dev`) como en una subcarpeta (`ccastillo.dev/qr/`), sin
-recompilar distinto.
-
-## Despliegue con Nginx
-
-Copiar el contenido de `dist/` al servidor y servirlo como sitio estático:
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name qr.ccastillo.dev;
-
-    root /var/www/qr;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Los nombres de archivo llevan hash, así que se pueden cachear indefinidamente.
-    location ~* \.(js|css|svg|woff2)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-}
-```
-
-Para servirlo desde una subcarpeta, basta con un `location /qr/ { alias /var/www/qr/; }`
-apuntando al mismo directorio.
-
-## Arquitectura
-
-Pipeline unidireccional de cuatro etapas:
-
-```
-content-types.ts   formulario            →  cadena final a codificar
-        ↓
-qr-engine.ts       cadena + nivel ECC    →  matriz de módulos
-        ↓
-geometry.ts        matriz + forma        →  trazados en coordenadas de módulo
-        ↓
-renderer.ts        trazados               →  canvas  |  SVG
-        ↓                                        ↓
-export.ts          descarga PNG | SVG      verify.ts  ¿se vuelve a leer?
-```
-
-| Archivo | Responsabilidad |
-|---|---|
-| `src/qr-engine.ts` | Único módulo que conoce la librería `qrcode`. Devuelve la matriz cruda. |
-| `src/geometry.ts` | Traduce la matriz a trazados en coordenadas de módulo. Formas y zona silenciosa. |
-| `src/renderer.ts` | Lleva esos trazados a canvas y a SVG. Color y logo. |
-| `src/verify.ts` | Decodifica el código dibujado y explica la causa probable si no se lee. |
-| `src/content-types.ts` | Los tipos de contenido, declarados como dato: campos y serialización. |
-| `src/contrast.ts` | Luminancia relativa y avisos de escaneabilidad. |
-| `src/export.ts` | Descargas mediante blobs locales. |
-| `src/state.ts` | Estado de la aplicación. |
-| `src/ui/` | Construcción del formulario y de los controles. |
-| `src/background.tsx` | Monta el fondo visual React/Warp detrás de la interfaz. |
-
-**Por qué renderizado propio.** Se usa `QRCode.create()` en vez de `toCanvas()` o
-`toString()` para quedarse con la matriz de módulos. Los renderizadores de la librería no
-admiten un logo superpuesto ni control fino del dibujado. Partiendo de la matriz, el PNG y
-el SVG salen de la misma fuente de verdad y son idénticos, y la lógica de color, zona
-silenciosa y logo vive en un solo sitio. La librería sigue resolviendo lo difícil:
-corrección de errores Reed-Solomon y selección de máscara.
-
-## Las tres capas de verificación, y qué garantiza cada una
-
-Ninguna sustituye a las otras. Están ordenadas de más barata a más real.
-
-| Capa | Qué comprueba | Qué **no** comprueba |
-|---|---|---|
-| `tests/decode.test.ts` | Que lo serializado vuelve idéntico tras pasar por un QR y un lector. Cubre escapados y juegos de caracteres. | La geometría del dibujado: los lectores toleran desplazamientos, espejados y hasta la falta de zona silenciosa. |
-| `tests/geometry.test.ts` | Que el trazado respeta la zona silenciosa y excluye los patrones de localización, en las 16 combinaciones de forma. | Que el resultado se lea. |
-| Verificación en vivo (`src/verify.ts`) | Que el código real —con su forma, sus colores y su logo— se decodifica y devuelve lo esperado. | Que se lea **impreso**, en papel y con poca luz. De eso avisa `contrast.ts`. |
-
-La verificación en vivo no bloquea la descarga. Muestra la evidencia y la decisión sigue
-siendo del usuario: hay combinaciones que un lector rechaza y una cámara concreta acepta.
-
-El lector pesa 130 KB, casi cuatro veces el resto de la aplicación junta, así que se carga
-en un chunk aparte en cuanto termina la primera pintada. El código aparece al instante y
-la verificación llega un momento después, sin retrasar nada.
-
-Esta capa ya se ganó el sueldo: detectó que la forma de punto con radio 0.42 no se leía
-en ninguna de sus combinaciones, porque los huecos entre módulos parten el patrón de
-sincronización.
-
-## Detalles que determinan si un código escanea
-
-- **Zona silenciosa de 4 módulos**, siempre, incluida en la exportación. Su ausencia es la
-  causa más común de códigos que no se leen.
-- **Tamaño de módulo entero en píxeles.** Un módulo fraccionario produce bordes borrosos
-  por antialiasing, y los bordes borrosos son la segunda causa.
-- **Escapado de WiFi.** Los caracteres `\ ; , : "` en el SSID o la contraseña se escapan
-  con barra invertida. Sin eso, el código se genera sin protestar y falla al escanear.
-- **Logo → nivel H obligatorio.** Con logo el nivel queda fijo en H (recupera el 30%) y el
-  logo se limita al 22% del área, sobre un margen del color de fondo.
-- **Aviso de contraste.** Se advierte por debajo de 4.5:1 y con más énfasis por debajo de
-  3:1. Se avisa, nunca se impide: la decisión es del usuario.
-
-## Fuera de alcance
-
-Cuentas de usuario, códigos dinámicos o acortador propio, analítica de escaneo, y backend
-de cualquier tipo.
+Creado por [JCastilloPadilla](https://github.com/JCastilloPadilla).

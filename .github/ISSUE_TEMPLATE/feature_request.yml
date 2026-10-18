@@ -1,0 +1,18 @@
+name: Proponer una mejora
+description: Una idea para hacer más útil el generador local.
+title: "[Mejora]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qué problema resolvería
+      description: Describe el caso de uso.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solución propuesta
+      description: Explica cómo encaja con el procesamiento local y los QR estáticos.
+    validations:
+      required: true

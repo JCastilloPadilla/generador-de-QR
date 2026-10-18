@@ -1,0 +1,32 @@
+name: Reportar un problema
+description: Algo no funciona al generar, personalizar o descargar un QR.
+title: "[Error]: "
+body:
+  - type: markdown
+    attributes:
+      value: Usa ejemplos ficticios. No compartas contraseñas WiFi, contactos ni códigos privados.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      description: Indica el tipo de contenido y las opciones de apariencia o exportación.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Qué esperabas y qué ocurrió
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Navegador y dispositivo
+      placeholder: Chrome en Android, Safari en iPhone…
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Capturas o información adicional
+      description: Comprueba que no contienen datos personales.

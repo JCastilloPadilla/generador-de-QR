@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">QR — tu contenido, directo al código</title>
+  <desc id="desc">Portada monocroma del generador. Ilustración decorativa, no es un código escaneable.</desc>
+  <defs>
+    <linearGradient id="paper" x2="1" y2="1"><stop stop-color="#F7F8FA"/><stop offset="1" stop-color="#E2E5EB"/></linearGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#15181F" stroke-opacity=".045"/></pattern>
+  </defs>
+  <rect width="1200" height="360" rx="18" fill="url(#paper)"/>
+  <rect width="1200" height="360" rx="18" fill="url(#grid)"/>
+  <g fill="#15181F">
+    <path fill-rule="evenodd" d="M56 44h28v28H56zM60 48v20h20V48z"/><path d="M65 53h10v10H65z"/>
+    <text x="97" y="66" font-family="Arial,Helvetica,sans-serif" font-size="23" font-weight="700">QR</text>
+    <text x="56" y="145" font-family="Arial,Helvetica,sans-serif" font-size="48" font-weight="700" letter-spacing="-2">Tu contenido.</text>
+    <text x="56" y="201" font-family="Arial,Helvetica,sans-serif" font-size="48" font-weight="700" letter-spacing="-2">Directo al código.</text>
+  </g>
+  <text x="58" y="244" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#535B6C">Genera · Personaliza · Descarga</text>
+  <path d="M56 287h650" stroke="#15181F" stroke-opacity=".14"/>
+  <text x="58" y="316" font-family="monospace" font-size="13" fill="#535B6C" letter-spacing="1">ESTÁTICO / LOCAL / PNG + SVG</text>
+  <g transform="translate(850 58)">
+    <rect x="-22" y="-18" width="280" height="280" rx="16" fill="#FFFFFF" fill-opacity=".65" stroke="#FFFFFF"/>
+    <g fill="#15181F" fill-rule="evenodd">
+      <path d="M0 0h84v84H0zM12 12v60h60V12z"/><path d="M24 24h36v36H24z"/>
+      <path d="M144 0h84v84h-84zM156 12v60h60V12z"/><path d="M168 24h36v36h-36z"/>
+      <path d="M0 144h84v84H0zM12 156v60h60v-60z"/><path d="M24 168h36v36H24z"/>
+    </g>
+    <g fill="#15181F" opacity=".2"><rect x="108" width="12" height="12"/><rect x="108" y="36" width="12" height="36"/><rect y="108" width="36" height="12"/><rect x="60" y="108" width="12" height="12"/><rect x="108" y="108" width="36" height="36"/><rect x="168" y="108" width="60" height="12"/><rect x="108" y="168" width="12" height="60"/><rect x="144" y="168" width="36" height="12"/><rect x="204" y="144" width="24" height="36"/><rect x="144" y="204" width="12" height="24"/><rect x="180" y="204" width="48" height="24"/></g>
+  </g>
+</svg>
