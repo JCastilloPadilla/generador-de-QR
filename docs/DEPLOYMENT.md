@@ -1,5 +1,10 @@
 # Despliegue estático
 
+La instancia pública está en **[qr.ccastillo.dev](https://qr.ccastillo.dev/)**, servida
+por Apache en el VPS. Su configuración y mantenimiento están documentados en
+[infra/qr.ccastillo.dev/README.md](../infra/qr.ccastillo.dev/README.md).
+El ejemplo de Nginx de esta guía es una alternativa para otros servidores.
+
 ```bash
 npm ci
 npm test

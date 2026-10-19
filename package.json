@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "license": "MIT",
+  "homepage": "https://qr.ccastillo.dev/",
   "description": "Generador de códigos QR que funciona por completo en el navegador.",
   "type": "module",
   "scripts": {

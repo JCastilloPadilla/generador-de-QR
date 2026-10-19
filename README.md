@@ -15,7 +15,7 @@ Sin cuentas, publicidad ni redirecciones gestionadas por este proyecto.
 ![Procesamiento](https://img.shields.io/badge/procesamiento-local-15181F?style=flat-square)
 [![Licencia MIT](https://img.shields.io/badge/licencia-MIT-15181F?style=flat-square)](LICENSE)
 
-[Empezar](#ejecutarlo-en-local) · [Arquitectura](docs/ARCHITECTURE.md) · [Despliegue](docs/DEPLOYMENT.md) · [Contribuir](CONTRIBUTING.md) · [Reportar un problema](https://github.com/JCastilloPadilla/generador-de-QR/issues/new/choose)
+[Abrir el generador](https://qr.ccastillo.dev/) · [Empezar en local](#ejecutarlo-en-local) · [Arquitectura](docs/ARCHITECTURE.md) · [Despliegue](docs/DEPLOYMENT.md) · [Contribuir](CONTRIBUTING.md) · [Reportar un problema](https://github.com/JCastilloPadilla/generador-de-QR/issues/new/choose)
 
 </div>
 
